@@ -1,0 +1,50 @@
+name: Sync GStreamer Main to GitHub
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # UTC 3, NOON KST
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install git and curl
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git curl
+
+      - name: Check if target repository exists
+        id: check_repo
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token ${{ secrets.SYNC_PAT }}" \
+            https://api.github.com/repos/gstreamer101/gstreamer)
+          echo "HTTP response: $RESPONSE"
+          if [ "$RESPONSE" -eq 404 ]; then
+            echo "Repository not found. Creating..."
+            curl -s -X POST \
+              -H "Authorization: token ${{ secrets.PAT }}" \
+              https://api.github.com/orgs/gstreamer101/repos \
+              -d '{
+                "name": "gstreamer",
+                "private": false,
+                "description": "Mirror of upstream gstreamer main branch",
+                "auto_init": false
+              }'
+          else
+            echo "Repository already exists."
+          fi
+
+      - name: Clone or prepare your repository
+        run: |
+          git config --global user.email "forgekeeper-bot@gstreamer101.org"
+          git config --global user.name "Forgekeeper Bot"
+          git clone https://${{ secrets.SYNC_PAT }}@github.com/gstreamer101/gstreamer.git repo
+          cd repo
+          git remote add upstream https://gitlab.freedesktop.org/gstreamer/gstreamer.git || true
+          git fetch upstream
+          git checkout main || git checkout -b main
+          git merge upstream/main --no-edit || true
+          git push origin main
