@@ -45,6 +45,11 @@ jobs:
           cd repo
           git remote add upstream https://gitlab.freedesktop.org/gstreamer/gstreamer.git || true
           git fetch upstream
+
+      - name: Hard reset to upstream/main and push forcefully
+        run: |
+          cd repo
           git checkout main || git checkout -b main
-          git merge upstream/main --no-edit || true
-          git push origin main
+          git reset --hard upstream/main
+          git push --force origin main
+
