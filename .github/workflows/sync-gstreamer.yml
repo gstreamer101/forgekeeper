@@ -25,7 +25,7 @@ jobs:
           if [ "$RESPONSE" -eq 404 ]; then
             echo "Repository not found. Creating..."
             curl -s -X POST \
-              -H "Authorization: token ${{ secrets.PAT }}" \
+              -H "Authorization: token ${{ secrets.SYNC_PAT }}" \
               https://api.github.com/orgs/gstreamer101/repos \
               -d '{
                 "name": "gstreamer",
