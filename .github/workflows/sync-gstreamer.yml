@@ -1,4 +1,4 @@
-name: Sync GStreamer Main to GitHub
+name: GStreamer Sync
 
 on:
   schedule:

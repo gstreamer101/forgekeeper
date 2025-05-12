@@ -1,4 +1,4 @@
-name: Sync Cerbero Main to GitHub
+name: Cerbero Sync
 
 on:
   schedule:
